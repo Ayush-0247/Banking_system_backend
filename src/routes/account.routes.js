@@ -1,6 +1,6 @@
-const express = require("express")
-const authMiddleware = require("../middleware/auth.middleware")
-const accountController = require("../controllers/account.controller")
+import express from "express";
+import * as authMiddleware from "../middleware/auth.middleware.js";
+import * as accountController from "../controllers/account.controller.js";
 
 
 const router = express.Router()
@@ -30,4 +30,4 @@ router.get("/balance/:accountId", authMiddleware.authMiddleware, accountControll
 
 
 
-module.exports = router
+export default router;

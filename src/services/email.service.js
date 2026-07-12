@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -64,7 +64,7 @@ async function sendTransactionFailureEmail(userEmail, name, amount, toAccount) {
     await sendEmail(userEmail, subject, text, html);
 }
 
-module.exports = {
+export {
     sendRegistrationEmail,
     sendTransactionEmail,
     sendTransactionFailureEmail

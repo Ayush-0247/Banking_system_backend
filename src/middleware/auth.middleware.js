@@ -1,6 +1,6 @@
-const userModel = require("../models/user.model")
-const jwt = require("jsonwebtoken")
-const tokenBlackListModel = require("../models/blackList.model")
+import userModel from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import tokenBlackListModel from "../models/blackList.model.js";
 
 
 
@@ -78,7 +78,7 @@ async function authSystemUserMiddleware(req, res, next) {
 
 }
 
-module.exports = {
+export {
     authMiddleware,
     authSystemUserMiddleware
-}
+};
