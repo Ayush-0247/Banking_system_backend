@@ -1,4 +1,4 @@
-const accountModel = require("../models/account.model");
+import accountModel from "../models/account.model.js";
 
 
 async function createAccountController(req, res) {
@@ -47,8 +47,8 @@ async function getAccountBalanceController(req, res) {
 }
 
 
-module.exports = {
+export {
     createAccountController,
     getUserAccountsController,
     getAccountBalanceController
-}
+};
