@@ -2,6 +2,7 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import * as emailService from "../services/email.service.js";
 import tokenBlackListModel from "../models/blackList.model.js";
+import bcrypt from "bcryptjs";
 
 /**
 * - user register controller
@@ -110,9 +111,55 @@ async function userLogoutController(req, res) {
 
 }
 
+/**
+ * - User Delete Controller
+ * - POST /api/auth/deleteuser
+ * ONLY FOR DEVELOPMENT AND TESTING PURPOSE
+  */
+
+async function deleteUserController(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userModel
+      .findOne({ email })
+      .select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "failed",
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        status: "failed",
+        message: "Invalid password",
+      });
+    }
+
+    await userModel.findByIdAndDelete(user._id);
+
+    res.clearCookie("token");
+
+    return res.status(200).json({
+      status: "success",
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "failed",
+      message: error.message,
+    });
+  }
+}
 
 export {
     userRegisterController,
     userLoginController,
-    userLogoutController
+    userLogoutController,
+    deleteUserController
 };
