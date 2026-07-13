@@ -17,5 +17,8 @@ router.post("/login",authController.userLoginController)
 router.post("/logout", authController.userLogoutController)
 
 
+router.post("/deleteuser", authController.deleteUserController)
+
+
 
 export default router;
