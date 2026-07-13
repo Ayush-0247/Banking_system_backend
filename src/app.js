@@ -1,11 +1,16 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import morgan from 'morgan';
+import cors from 'cors';
 
 
 const app = express();
 app.use(morgan('dev'));
 
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:5000"],
+    credentials: true
+}));
 
 app.use(express.json());
 app.use(cookieParser());
