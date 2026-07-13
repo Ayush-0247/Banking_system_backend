@@ -28,6 +28,7 @@ router.get("/", authMiddleware.authMiddleware, accountController.getUserAccounts
  */
 router.get("/balance/:accountId", authMiddleware.authMiddleware, accountController.getAccountBalanceController)
 
-
+router.get("/showallaccountofauser", authMiddleware.authMiddleware, accountController.showallaccountofauser)
+router.post("/deleteaccountofauser", authMiddleware.authMiddleware, accountController.deleteaccountofauser)
 
 export default router;
