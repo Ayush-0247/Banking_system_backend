@@ -9,16 +9,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-/**
- * - Routes required
- */
 import authRouter from "./routes/auth.routes.js";
 import accountRouter from "./routes/account.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
 
-/**
- * - Use Routes
- */
 
 app.get("/", (req, res) => {
     res.send("Ledger Service is up and running");
