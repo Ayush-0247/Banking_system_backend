@@ -28,7 +28,18 @@ router.get("/", authMiddleware.authMiddleware, accountController.getUserAccounts
  */
 router.get("/balance/:accountId", authMiddleware.authMiddleware, accountController.getAccountBalanceController)
 
+
+/**
+ * Show All Accounts Of A User
+ * - GET /api/accounts/showallaccountofauser
+ */
 router.get("/showallaccountofauser", authMiddleware.authMiddleware, accountController.showallaccountofauser)
+
+
+/**
+ * Delete A Account Of A User , user Should BE loggedIn
+ * - GET /api/accounts/deleteaccountofauser
+ */
 router.post("/deleteaccountofauser", authMiddleware.authMiddleware, accountController.deleteaccountofauser)
 
 export default router;
