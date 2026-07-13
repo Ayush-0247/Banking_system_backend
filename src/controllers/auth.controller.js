@@ -49,6 +49,8 @@ async function userRegisterController(req, res) {
 async function userLoginController(req, res) {
     const { email, password } = req.body
 
+    //"+password" will select the password field as well coz in schema we have select: false for password means password will not be selected to send unless we asked , that is by "+password" we ask to send password too.
+    //
     const user = await userModel.findOne({ email }).select("+password")
 
     if (!user) {
