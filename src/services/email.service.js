@@ -62,8 +62,52 @@ async function sendTransactionFailureEmail(userEmail, name, amount, toAccount) {
   await sendEmail(userEmail, subject, text, html);
 }
 
+async function sendOTPEmail(email, name, otp) {
+    return transporter.sendMail({
+        to: email,
+        subject: "Reset Your Password",
+        html: `
+            <h2>Hello ${name},</h2>
+
+            <p>We received a request to reset your password.</p>
+
+            <p>Your verification code is:</p>
+
+            <h1 style="letter-spacing:5px;">${otp}</h1>
+
+            <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+
+            <p>If you didn't request a password reset, you can safely ignore this email.</p>
+
+            <br>
+            <p>Regards,</p>
+            <p><strong>CipherVest Team</strong></p>
+        `
+    });
+}
+
+async function sendNewPasswordSetEmail(email, name) {
+    return transporter.sendMail({
+        to: email,
+        subject: "Password Reset Successful",
+        html: `
+            <h2>Hello ${name},</h2>
+
+            <p>Your password has been successfully reset.</p>
+
+            <p>You can now log in with your new password.</p>
+
+            <br>
+            <p>Regards,</p>
+            <p><strong>CipherVest Team</strong></p>
+        `
+    });
+}
+
 export {
   sendRegistrationEmail,
   sendTransactionEmail,
   sendTransactionFailureEmail,
+  sendOTPEmail,
+  sendNewPasswordSetEmail
 };
