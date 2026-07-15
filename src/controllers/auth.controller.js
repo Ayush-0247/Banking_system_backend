@@ -159,6 +159,10 @@ async function deleteUserController(req, res) {
 }
 
 
+/**
+ * - Forgot Password Controller
+ * - POST /api/auth/forgot-password
+  */
 async function forgotPasswordController(req, res) {
     const { email } = req.body;
 
@@ -196,6 +200,12 @@ async function forgotPasswordController(req, res) {
     });
 }
 
+
+
+/**
+ * - Forgot Password Controller
+ * - POST /api/auth/reset-password
+  */
 async function resetPasswordController(req, res) {
 
     const { email, otp, newPassword } = req.body;

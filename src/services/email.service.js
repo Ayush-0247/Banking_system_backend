@@ -62,6 +62,8 @@ async function sendTransactionFailureEmail(userEmail, name, amount, toAccount) {
   await sendEmail(userEmail, subject, text, html);
 }
 
+
+//send otp in case of forget password
 async function sendOTPEmail(email, name, otp) {
     return transporter.sendMail({
         to: email,
@@ -86,6 +88,8 @@ async function sendOTPEmail(email, name, otp) {
     });
 }
 
+
+// send confirmation email to user that new password is set
 async function sendNewPasswordSetEmail(email, name) {
     return transporter.sendMail({
         to: email,

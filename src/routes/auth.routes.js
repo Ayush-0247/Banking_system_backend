@@ -20,7 +20,8 @@ router.post("/logout", authController.userLogoutController)
 router.post("/deleteuser", authController.deleteUserController)
 
 
-// Public Routes
+// Public Routes for forget password and set new password
+// forgaet password api return otp, whic otp is send in reset password api to set new password
 router.post("/forgot-password", authController.forgotPasswordController);
 
 router.post("/reset-password", authController.resetPasswordController);
