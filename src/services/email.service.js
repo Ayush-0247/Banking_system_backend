@@ -83,7 +83,7 @@ async function sendOTPEmail(email, name, otp) {
 
             <br>
             <p>Regards,</p>
-            <p><strong>CipherVest Team</strong></p>
+          <p><strong>Prince Banking Company Team</strong></p>
         `
     });
 }
@@ -103,7 +103,7 @@ async function sendNewPasswordSetEmail(email, name) {
 
             <br>
             <p>Regards,</p>
-            <p><strong>CipherVest Team</strong></p>
+            <p><strong>Prince Banking Company Team</strong></p>
         `
     });
 }
