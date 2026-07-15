@@ -20,5 +20,11 @@ router.post("/logout", authController.userLogoutController)
 router.post("/deleteuser", authController.deleteUserController)
 
 
+// Public Routes
+router.post("/forgot-password", authController.forgotPasswordController);
+
+router.post("/reset-password", authController.resetPasswordController);
+
+
 
 export default router;

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import * as emailService from "../services/email.service.js";
 import tokenBlackListModel from "../models/blackList.model.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 /**
 * - user register controller
@@ -157,9 +158,98 @@ async function deleteUserController(req, res) {
   }
 }
 
+
+async function forgotPasswordController(req, res) {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    const otp = Math.floor(
+        100000 + Math.random() * 900000
+    ).toString();
+
+    const hashedOTP = crypto
+        .createHash("sha256")
+        .update(otp)
+        .digest("hex");
+
+    user.resetPasswordOTP = hashedOTP;
+    user.resetPasswordOTPExpires =
+        Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    await emailService.sendOTPEmail(
+        user.email,
+        user.name,
+        otp
+    );
+
+    res.json({
+        message: "OTP sent successfully."
+    });
+}
+
+async function resetPasswordController(req, res) {
+
+    const { email, otp, newPassword } = req.body;
+
+    const user = await userModel
+        .findOne({ email })
+        .select("+password");
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    if (user.resetPasswordOTPExpires < Date.now()) {
+        return res.status(400).json({
+            message: "OTP expired"
+        });
+    }
+
+    const hashedOTP = crypto
+        .createHash("sha256")
+        .update(otp)
+        .digest("hex");
+
+    if (hashedOTP !== user.resetPasswordOTP) {
+        return res.status(400).json({
+            message: "Invalid OTP"
+        });
+    }
+
+    user.password = newPassword;
+
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordOTPExpires = undefined;
+
+    await user.save();
+
+     await emailService.sendNewPasswordSetEmail(
+        user.email,
+        user.name,
+    );
+
+    res.json({
+        message: "Password updated successfully."
+    });
+}
+
+
 export {
     userRegisterController,
     userLoginController,
     userLogoutController,
-    deleteUserController
+    deleteUserController,
+    forgotPasswordController,
+    resetPasswordController
 };
