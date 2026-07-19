@@ -42,4 +42,15 @@ router.get("/showallaccountofauser", authMiddleware.authMiddleware, accountContr
  */
 router.post("/deleteaccountofauser", authMiddleware.authMiddleware, accountController.deleteaccountofauser)
 
+
+
+
+
+/**
+ * - POST /api/accounts/deposit
+ * - Deposit money into an account
+ * - Protected Route
+ */
+router.post("/deposit", authMiddleware.authMiddleware, accountController.depositMoneyController)
+
 export default router;
