@@ -269,3 +269,31 @@ export async function getAllTransactionsController(req, res) {
 }
 
 
+export async function getMyTransactionsController(req, res) {
+    try {
+        const userId = req.user._id;
+
+        const transactions = await transactionModel
+            .find({
+                $or: [
+                    { sender: userId },
+                    { receiver: userId }
+                ]
+            })
+            .populate("sender", "fullname email")
+            .populate("receiver", "fullname email")
+            .populate("fromAccount", "accountNumber")
+            .populate("toAccount", "accountNumber")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            count: transactions.length,
+            transactions
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+}

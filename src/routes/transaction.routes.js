@@ -21,10 +21,16 @@
 // export default transactionRoutes;
 
 import { Router } from "express";
-import { getAllTransactionsController } from "../controllers/transaction.controller.js";
+import { getAllTransactionsController , getMyTransactionsController } from "../controllers/transaction.controller.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
+
+// for all tranactions;
 router.get("/", getAllTransactionsController);
+
+// for transaction of users only
+router.get("/user", authMiddleware, getMyTransactionsController);
 
 export default router;
