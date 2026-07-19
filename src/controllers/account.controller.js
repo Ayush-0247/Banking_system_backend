@@ -86,10 +86,42 @@ async function deleteaccountofauser(req, res) {
 }
 
 
+async function depositMoneyController(req, res) {
+    const { accountId, amount } = req.body;
+
+    if (!amount || amount <= 0) {
+        return res.status(400).json({
+            message: "Invalid amount"
+        });
+    }
+
+    const account = await accountModel.findOne({
+        _id: accountId,
+        user: req.user._id
+    });
+
+    if (!account) {
+        return res.status(404).json({
+            message: "Account not found"
+        });
+    }
+
+    account.balance += Number(amount);
+
+    await account.save();
+
+    res.status(200).json({
+        message: "Money deposited successfully",
+        balance: account.balance
+    });
+}
+
+
 export {
     createAccountController,
     getUserAccountsController,
     getAccountBalanceController,
     showallaccountofauser,
     deleteaccountofauser,
+    depositMoneyController
 };
