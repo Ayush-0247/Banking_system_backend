@@ -1,5 +1,5 @@
 import accountModel from "../models/account.model.js";
-
+import * as emailService from "../services/email.service.js";
 
 async function createAccountController(req, res) {
 
@@ -110,7 +110,14 @@ async function depositMoneyController(req, res) {
 
     await account.save();
 
-    res.status(200).json({
+    await emailService.sendDepositEmail(
+        req.user.email,
+        req.user.name,
+        amount,
+        account.accountNumber // only if this field exists
+    );
+
+    return res.status(200).json({
         message: "Money deposited successfully",
         balance: account.balance
     });
@@ -152,6 +159,13 @@ async function withdrawMoneyController(req, res) {
         message: "Money withdrawn successfully",
         balance: account.balance
     });
+
+       await emailService.sendWithdrawEmail(
+        req.user.email,
+        req.user.name,
+        amount,
+        account.accountNumber // only if this field exists
+    );
 }
 
 
