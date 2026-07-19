@@ -108,10 +108,32 @@ async function sendNewPasswordSetEmail(email, name) {
     });
 }
 
+
+// send to user when de deposit money to his account
+async function sendDepositEmail(userEmail, name, amount , accountNumber) {
+    const subject = "Deposit Successful!";
+    const text = `Hello ${name},\n\nYour deposit of $${amount} was successful in account number ${accountNumber}.\n\nBest regards,\nThe Prince Banking company Team`;
+    const html = `<p>Hello ${name},</p><p>Your deposit of $${amount} was successful.</p><p>Best regards,<br>The Prince Banking company Team</p>`;
+
+    await sendEmail(userEmail, subject, text, html);
+}
+
+
+// send to user after withdraw money from his account
+async function sendWithdrawEmail(userEmail, name, amount , accountNumber) {
+    const subject = "Withdraw Successful!";
+    const text = `Hello ${name},\n\nYour withdraw of $${amount} was successful in account number ${accountNumber}.\n\nBest regards,\nThe Prince Banking company Team`;
+    const html = `<p>Hello ${name},</p><p>Your withdraw of $${amount} was successful.</p><p>Best regards,<br>The Prince Banking company Team</p>`;
+
+    await sendEmail(userEmail, subject, text, html);
+}
+
 export {
   sendRegistrationEmail,
   sendTransactionEmail,
   sendTransactionFailureEmail,
   sendOTPEmail,
-  sendNewPasswordSetEmail
+  sendNewPasswordSetEmail,
+  sendDepositEmail,
+  sendWithdrawEmail,
 };
