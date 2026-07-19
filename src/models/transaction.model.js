@@ -1,43 +1,49 @@
 import mongoose from "mongoose";
 
-
-const transactionSchema = new mongoose.Schema({
+const transactionSchema = new mongoose.Schema(
+  {
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
     fromAccount: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "account",
-        required: [ true, "Transaction must be associated with a from account" ],
-        index: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "account",
+      required: true,
     },
     toAccount: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "account",
-        required: [ true, "Transaction must be associated with a to account" ],
-        index: true
-    },
-    status: {
-        type: String,
-        enum: {
-            values: [ "PENDING", "COMPLETED", "FAILED", "REVERSED" ],
-            message: "Status can be either PENDING, COMPLETED, FAILED or REVERSED",
-        },
-        default: "PENDING"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "account",
+      required: true,
     },
     amount: {
-        type: Number,
-        required: [ true, "Amount is required for creating a transaction" ],
-        min: [ 0, "Transaction amount cannot be negative" ]
+      type: Number,
+      required: true,
+    },
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    status: {
+      type: String,
+      default: "SUCCESS",
     },
     idempotencyKey: {
-        type: String,
-        required: [ true, "Idempotency Key is required for creating a transaction" ],
-        index: true,
-        unique: true
-    }
-}, {
-    timestamps: true
-})
-
-const transactionModel = mongoose.model("transaction", transactionSchema)
-
-
-export default transactionModel;   
+      type: String,
+    },
+    type: {
+      type: String,
+      enum: ["TRANSFER", "DEPOSIT", "WITHDRAW"],
+      default: "TRANSFER",
+    },
+  },
+  { timestamps: true }
+);
+transactionSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
+export default mongoose.model("Transaction", transactionSchema);

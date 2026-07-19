@@ -1,6 +1,8 @@
 import accountModel from "../models/account.model.js";
 import * as emailService from "../services/email.service.js";
 import mongoose from "mongoose";
+import transactionModel from "../models/transaction.model.js";
+import crypto from "crypto";
 
 async function createAccountController(req, res) {
   const user = req.user;
@@ -82,83 +84,165 @@ async function deleteaccountofauser(req, res) {
 }
 
 async function depositMoneyController(req, res) {
-  const { accountId, amount } = req.body;
+  const session = await mongoose.startSession();
 
-  if (!amount || amount <= 0) {
-    return res.status(400).json({
-      message: "Invalid amount",
+  try {
+    session.startTransaction();
+
+    const { accountId, amount } = req.body;
+
+    const depositAmount = Number(amount);
+
+    if (isNaN(depositAmount) || depositAmount <= 0) {
+      return res.status(400).json({
+        message: "Invalid amount",
+      });
+    }
+
+    const account = await accountModel
+      .findOne({
+        _id: accountId,
+        user: req.user._id,
+      })
+      .session(session);
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    account.balance += depositAmount;
+
+    await account.save({ session });
+
+    const idempotencyKey = crypto.randomUUID();
+    await transactionModel.create(
+      [
+        {
+          sender: req.user._id,
+          receiver: req.user._id,
+          fromAccount: account._id,
+          toAccount: account._id,
+          amount: depositAmount,
+          idempotencyKey,
+          type: "DEPOSIT",
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+
+    await emailService.sendDepositEmail(
+      req.user.email,
+      req.user.name,
+      depositAmount,
+      account.accountNumber, // only if this field exists
+    );
+
+    return res.status(200).json({
+      message: "Money deposited successfully",
+      balance: account.balance,
     });
-  }
+  } catch (err) {
+    console.log(err);
 
-  const account = await accountModel.findOne({
-    _id: accountId,
-    user: req.user._id,
-  });
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
 
-  if (!account) {
-    return res.status(404).json({
-      message: "Account not found",
+    res.status(500).json({
+      message: err.message,
+      stack: err.stack,
     });
+  } finally {
+    session.endSession();
   }
-
-  account.balance += Number(amount);
-
-  await account.save();
-
-  await emailService.sendDepositEmail(
-    req.user.email,
-    req.user.name,
-    amount,
-    account.accountNumber, // only if this field exists
-  );
-
-  return res.status(200).json({
-    message: "Money deposited successfully",
-    balance: account.balance,
-  });
 }
 
 async function withdrawMoneyController(req, res) {
-  const { accountId, amount } = req.body;
+  const session = await mongoose.startSession();
 
-  if (!amount || amount <= 0) {
-    return res.status(400).json({
-      message: "Invalid amount",
+  try {
+    session.startTransaction();
+
+    const { accountId, amount } = req.body;
+
+    const withdrawAmount = Number(amount);
+
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+      return res.status(400).json({
+        message: "Invalid amount",
+      });
+    }
+
+    const account = await accountModel
+      .findOne({
+        _id: accountId,
+        user: req.user._id,
+      })
+      .session(session);
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    if (account.balance < withdrawAmount) {
+      return res.status(400).json({
+        message: "Insufficient balance",
+      });
+    }
+
+    account.balance -= withdrawAmount;
+
+    await account.save({ session });
+
+    const idempotencyKey = crypto.randomUUID();
+    await transactionModel.create(
+      [
+        {
+          sender: req.user._id,
+          receiver: req.user._id,
+          fromAccount: account._id,
+          toAccount: account._id,
+          amount: withdrawAmount,
+          idempotencyKey,
+          type: "WITHDRAW",
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+
+    await emailService.sendWithdrawEmail(
+      req.user.email,
+      req.user.name,
+      withdrawAmount,
+      account.accountNumber, // only if this field exists
+    );
+
+    res.status(200).json({
+      message: "Money withdrawn successfully",
+      balance: account.balance,
     });
-  }
+  } catch (err) {
+    console.log(err);
 
-  const account = await accountModel.findOne({
-    _id: accountId,
-    user: req.user._id,
-  });
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
 
-  if (!account) {
-    return res.status(404).json({
-      message: "Account not found",
+    res.status(500).json({
+      message: err.message,
+      stack: err.stack,
     });
+  } finally {
+    session.endSession();
   }
-
-  if (account.balance < amount) {
-    return res.status(400).json({
-      message: "Insufficient balance",
-    });
-  }
-
-  account.balance -= Number(amount);
-
-  await account.save();
-
-  res.status(200).json({
-    message: "Money withdrawn successfully",
-    balance: account.balance,
-  });
-
-  await emailService.sendWithdrawEmail(
-    req.user.email,
-    req.user.name,
-    amount,
-    account.accountNumber, // only if this field exists
-  );
 }
 
 async function transferMoneyController(req, res) {
@@ -212,6 +296,22 @@ async function transferMoneyController(req, res) {
     await sender.save({ session });
     await receiver.save({ session });
 
+    const idempotencyKey = crypto.randomUUID();
+    await transactionModel.create(
+      [
+        {
+          sender: sender.user,
+          receiver: receiver.user,
+          fromAccount: sender._id,
+          toAccount: receiver._id,
+          amount: transferAmount,
+          idempotencyKey,
+          type: "TRANSFER",
+        },
+      ],
+      { session }
+    );
+
     await session.commitTransaction();
 
     res.status(200).json({
@@ -219,10 +319,16 @@ async function transferMoneyController(req, res) {
       senderBalance: sender.balance,
     });
   } catch (err) {
-    await session.abortTransaction();
 
-    res.status(400).json({
+    console.log(err);
+
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    res.status(500).json({
       message: err.message,
+      stack: err.stack
     });
   } finally {
     session.endSession();
