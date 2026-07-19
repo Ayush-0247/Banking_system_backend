@@ -117,11 +117,50 @@ async function depositMoneyController(req, res) {
 }
 
 
+
+async function withdrawMoneyController(req, res) {
+    const { accountId, amount } = req.body;
+
+    if (!amount || amount <= 0) {
+        return res.status(400).json({
+            message: "Invalid amount"
+        });
+    }
+
+    const account = await accountModel.findOne({
+        _id: accountId,
+        user: req.user._id
+    });
+
+    if (!account) {
+        return res.status(404).json({
+            message: "Account not found"
+        });
+    }
+
+    if (account.balance < amount) {
+        return res.status(400).json({
+            message: "Insufficient balance"
+        });
+    }
+
+    account.balance -= Number(amount);
+
+    await account.save();
+
+    res.status(200).json({
+        message: "Money withdrawn successfully",
+        balance: account.balance
+    });
+}
+
+
 export {
     createAccountController,
     getUserAccountsController,
     getAccountBalanceController,
     showallaccountofauser,
     deleteaccountofauser,
-    depositMoneyController
+    depositMoneyController,
+    withdrawMoneyController
 };
