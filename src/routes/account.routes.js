@@ -53,4 +53,13 @@ router.post("/deleteaccountofauser", authMiddleware.authMiddleware, accountContr
  */
 router.post("/deposit", authMiddleware.authMiddleware, accountController.depositMoneyController)
 
+
+
+/**
+ * - POST /api/accounts/withdraw
+ * - Withdraw money from an account
+ * - Protected Route
+ */
+router.post("/withdraw", authMiddleware.authMiddleware, accountController.withdrawMoneyController)
+
 export default router;
