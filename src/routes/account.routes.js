@@ -62,4 +62,13 @@ router.post("/deposit", authMiddleware.authMiddleware, accountController.deposit
  */
 router.post("/withdraw", authMiddleware.authMiddleware, accountController.withdrawMoneyController)
 
+
+
+/**
+ * - POST /api/accounts/transfer
+ * - Transfer money between accounts
+ * - Protected Route
+ */
+router.post("/transfer", authMiddleware.authMiddleware, accountController.transferMoneyController)
+
 export default router;
